@@ -16,7 +16,8 @@ TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor 
 LR_CRITIC = 1e-3       # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
-
+UPDATE_EVERY = 20      # model is updated every UPDATE_EVERY time steps
+N_UPDATES = 10         # number of updates in every update
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -57,7 +58,10 @@ class Agent():
         # Save experience / reward
         self.memory.add(state, action, reward, next_state, done)
 
-        if len(self.memory) > BATCH_SIZE:
+        if time_step % UPDATE_EVERY != 0 or len(self.memory) <= BATCH_SIZE:
+            return
+        
+        for i in range(N_UPDATES):
             experiences = self.memory.sample()
             self.learn(experiences, GAMMA)
 
