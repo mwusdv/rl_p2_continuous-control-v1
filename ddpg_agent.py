@@ -14,7 +14,7 @@ BATCH_SIZE = 128       # minibatch size
 GAMMA = 0.99            # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor 
-LR_CRITIC = 2e-4       # learning rate of the critic
+LR_CRITIC = 1e-4       # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
 UPDATE_EVERY = 20      # model is updated every UPDATE_EVERY time steps
 N_UPDATES = 10         # number of updates in every update
@@ -76,8 +76,8 @@ class Agent():
             action += self.noise.sample()
         return np.clip(action, -1, 1)
 
-    def reset(self):
-        self.noise.reset()
+    def reset(self, sigma):
+        self.noise.reset(sigma)
 
     def learn(self, experiences, gamma):
         """Update policy and value parameters using given batch of experience tuples.
@@ -143,11 +143,12 @@ class OUNoise:
         self.theta = theta
         self.sigma = sigma
         self.seed = random.seed(seed)
-        self.reset()
+        self.reset(sigma)
 
-    def reset(self):
+    def reset(self, sigma):
         """Reset the internal state (= noise) to mean (mu)."""
         self.state = copy.copy(self.mu)
+        self.sigma = sigma
 
     def sample(self):
         """Update internal state and return it as a noise sample."""

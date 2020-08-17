@@ -29,12 +29,14 @@ def train_ddpg(env, max_episode=1000, max_t=1000, save_every=50, check_history=1
     scores = []
    
     # learning multiple episodes
+    sigma = 0.2
+    decay = 0.999
     for episode in range(max_episode):
         # prepare for training in the current epoc
         env_info = env.reset(train_mode=True)[brain_name]
         state = env_info.vector_observations[0]  
         score = 0
-        agent.reset()
+        agent.reset(sigma=sigma)
         
         # play and learn in current episode
         for t in range(max_t):
@@ -51,6 +53,7 @@ def train_ddpg(env, max_episode=1000, max_t=1000, save_every=50, check_history=1
             if done:
                 break 
             
+        sigma *= decay
         epoc_score = score
         scores_deque.append(epoc_score)
         scores.append(epoc_score)
