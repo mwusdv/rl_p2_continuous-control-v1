@@ -7,7 +7,8 @@ from collections import deque
 from ddpg_agent import Agent
 import matplotlib.pyplot as plt
 
-def train_ddpg(env, max_episode=1000, max_t=1000, save_every=50, check_history=100):
+def train_ddpg(env, max_episode=1000, max_t=1000, save_every=100, check_history=100,
+               sigma_start=0.2, sigma_end=0.01, sigma_decay=0.995):
     # reset
     brain_name = env.brain_names[0]
     brain = env.brains[brain_name]  
@@ -29,8 +30,7 @@ def train_ddpg(env, max_episode=1000, max_t=1000, save_every=50, check_history=1
     scores = []
    
     # learning multiple episodes
-    sigma = 0.2
-    decay = 0.999
+    sigma = sigma_start
     for episode in range(max_episode):
         # prepare for training in the current epoc
         env_info = env.reset(train_mode=True)[brain_name]
@@ -52,8 +52,11 @@ def train_ddpg(env, max_episode=1000, max_t=1000, save_every=50, check_history=1
             score += reward
             if done:
                 break 
-            
-        sigma *= decay
+        
+        # update sigma for exlporation
+        sigma = max(sigma_end, sigma*sigma_decay)
+        
+        # record score
         epoc_score = score
         scores_deque.append(epoc_score)
         scores.append(epoc_score)
@@ -72,7 +75,7 @@ def train_ddpg(env, max_episode=1000, max_t=1000, save_every=50, check_history=1
 
 if __name__ == '__main__':
     env = UnityEnvironment(file_name='Reacher_Linux/Reacher.x86_64')
-    scores = train_ddpg(env, max_episode=1000, max_t=1000, save_every=50, check_history=100)
+    scores = train_ddpg(env)
     env.close()
     
     fig = plt.figure()
